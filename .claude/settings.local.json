@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run:*)",
+      "Bash(ls /home/angelqs/projects/task-manager-app/frontend/.env*)"
+    ]
+  },
+  "enabledPlugins": {
+    "context7@claude-plugins-official": true
+  }
+}
