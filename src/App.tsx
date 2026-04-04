@@ -9,8 +9,10 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const API_URL = import.meta.env.VITE_API_URL ?? ''
+
   useEffect(() => {
-    fetch('/tasks')
+    fetch(`${API_URL}/tasks`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         return res.json() as Promise<Task[]>

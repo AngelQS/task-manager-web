@@ -5,6 +5,8 @@ interface Props {
   onCreated: (task: Task) => void
 }
 
+const API_URL = import.meta.env.VITE_API_URL ?? ''
+
 export default function TaskForm({ onCreated }: Props) {
   const [title, setTitle] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -18,7 +20,7 @@ export default function TaskForm({ onCreated }: Props) {
     setError(null)
 
     try {
-      const res = await fetch('/tasks', {
+      const res = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: title.trim() }),
