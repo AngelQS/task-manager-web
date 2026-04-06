@@ -1,34 +1,23 @@
 import type { Task, TaskStatus } from '../types/task'
 
-const STATUS_CYCLE: TaskStatus[] = ['PENDING', 'IN_PROGRESS', 'SCHEDULED', 'ON_HOLD', 'COMPLETED', 'CANCELLED']
+const STATUS_CYCLE: TaskStatus[] = [
+  'PENDING', 'IN_PROGRESS', 'SCHEDULED', 'ON_HOLD', 'COMPLETED', 'CANCELLED',
+]
 
-const STATUS_LABEL: Record<TaskStatus, string> = {
-  PENDING: 'Pending',
-  IN_PROGRESS: 'In Progress',
-  SCHEDULED: 'Scheduled',
-  ON_HOLD: 'On Hold',
-  COMPLETED: 'Completed',
-  CANCELLED: 'Cancelled',
+const STATUS_META: Record<TaskStatus, { label: string; bg: string; text: string }> = {
+  PENDING:     { label: 'Pending',     bg: 'rgba(255,159,10,0.12)',  text: '#b25000' },
+  IN_PROGRESS: { label: 'In Progress', bg: 'rgba(0,122,255,0.10)',   text: '#0055cc' },
+  SCHEDULED:   { label: 'Scheduled',   bg: 'rgba(88,86,214,0.10)',   text: '#3634a3' },
+  ON_HOLD:     { label: 'On Hold',     bg: 'rgba(255,107,0,0.10)',   text: '#c04800' },
+  COMPLETED:   { label: 'Completed',   bg: 'rgba(52,199,89,0.10)',   text: '#1a7f37' },
+  CANCELLED:   { label: 'Cancelled',   bg: 'rgba(142,142,147,0.12)', text: '#48484a' },
 }
 
-const STATUS_COLOR: Record<TaskStatus, { bg: string; text: string }> = {
-  PENDING:     { bg: '#fef9c3', text: '#854d0e' },
-  IN_PROGRESS: { bg: '#dbeafe', text: '#1d4ed8' },
-  SCHEDULED:   { bg: '#ede9fe', text: '#6d28d9' },
-  ON_HOLD:     { bg: '#ffedd5', text: '#c2410c' },
-  COMPLETED:   { bg: '#dcfce7', text: '#15803d' },
-  CANCELLED:   { bg: '#f1f5f9', text: '#64748b' },
-}
-
-const PRIORITY_BORDER: Record<string, string> = {
-  LOW:    '#94a3b8',
-  MEDIUM: '#3b82f6',
-  HIGH:   '#f97316',
-  URGENT: '#ef4444',
-}
-
-const PRIORITY_LABEL: Record<string, string> = {
-  LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', URGENT: 'Urgent',
+const PRIORITY_META: Record<string, { label: string; color: string }> = {
+  LOW:    { label: 'Low',    color: '#8e8e93' },
+  MEDIUM: { label: 'Medium', color: '#007aff' },
+  HIGH:   { label: 'High',   color: '#ff9500' },
+  URGENT: { label: 'Urgent', color: '#ff3b30' },
 }
 
 interface Props {
@@ -37,22 +26,23 @@ interface Props {
   onDelete: (id: number) => void
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatScheduled(iso: string) {
+  return new Date(iso).toLocaleString('en-US', {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
+function formatCreated(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export default function TaskCard({ task, onStatusChange, onDelete }: Props) {
-  const statusStyle = STATUS_COLOR[task.status]
-  const borderColor = PRIORITY_BORDER[task.priority]
-  const isCompleted = task.status === 'COMPLETED'
-  const isCancelled = task.status === 'CANCELLED'
-  const faded = isCompleted || isCancelled
+  const status = STATUS_META[task.status]
+  const priority = PRIORITY_META[task.priority]
+  const faded = task.status === 'COMPLETED' || task.status === 'CANCELLED'
 
   function cycleStatus() {
-    const idx = STATUS_CYCLE.indexOf(task.status)
-    const next = STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length]
+    const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(task.status) + 1) % STATUS_CYCLE.length]
     onStatusChange(task.id, next)
   }
 
@@ -60,131 +50,119 @@ export default function TaskCard({ task, onStatusChange, onDelete }: Props) {
     <div
       style={{
         background: '#ffffff',
-        borderRadius: 12,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-        borderLeft: `4px solid ${borderColor}`,
+        borderRadius: 14,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.07)',
         padding: '14px 16px',
-        marginBottom: 10,
+        marginBottom: 8,
         display: 'flex',
         gap: 12,
         alignItems: 'flex-start',
-        opacity: faded ? 0.6 : 1,
-        transition: 'opacity 0.2s',
+        opacity: faded ? 0.55 : 1,
+        transition: 'opacity 0.2s ease',
       }}
     >
       {/* Priority dot */}
-      <div style={{ paddingTop: 3 }}>
-        <div
-          title={`Priority: ${PRIORITY_LABEL[task.priority]}`}
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            background: borderColor,
-            flexShrink: 0,
-          }}
-        />
+      <div style={{ paddingTop: 4, flexShrink: 0 }}>
+        <svg width="8" height="8" viewBox="0 0 8 8">
+          <circle cx="4" cy="4" r="4" fill={priority.color} />
+        </svg>
       </div>
 
-      {/* Main content */}
+      {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p
           style={{
-            margin: '0 0 6px',
             fontSize: 15,
-            fontWeight: 600,
-            color: '#0f172a',
+            fontWeight: 500,
+            color: '#1d1d1f',
+            marginBottom: 6,
             textDecoration: faded ? 'line-through' : 'none',
+            letterSpacing: '-0.01em',
             wordBreak: 'break-word',
           }}
         >
           {task.title}
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
-          {/* Status badge — clickable to cycle */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+          {/* Status pill — clickable */}
           <button
             onClick={cycleStatus}
-            title="Click to change status"
+            title="Click to advance status"
             style={{
-              background: statusStyle.bg,
-              color: statusStyle.text,
+              background: status.bg,
+              color: status.text,
               border: 'none',
-              borderRadius: 20,
-              padding: '2px 10px',
-              fontSize: 11,
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-            }}
-          >
-            {STATUS_LABEL[task.status]}
-          </button>
-
-          {/* Priority badge */}
-          <span
-            style={{
-              background: '#f8fafc',
-              color: borderColor,
-              border: `1px solid ${borderColor}`,
-              borderRadius: 20,
-              padding: '2px 8px',
+              borderRadius: 980,
+              padding: '2px 9px',
               fontSize: 11,
               fontWeight: 600,
+              cursor: 'pointer',
+              letterSpacing: '0.02em',
             }}
           >
-            {PRIORITY_LABEL[task.priority]}
+            {status.label}
+          </button>
+
+          {/* Priority label */}
+          <span style={{ color: priority.color, fontSize: 11, fontWeight: 500 }}>
+            {priority.label}
           </span>
 
-          {/* Category tag */}
+          {/* Category */}
           {task.category && (
             <span
               style={{
-                background: '#f1f5f9',
-                color: '#475569',
-                borderRadius: 4,
-                padding: '2px 8px',
+                background: '#f2f2f7',
+                color: '#48484a',
+                borderRadius: 5,
+                padding: '2px 7px',
                 fontSize: 11,
               }}
             >
-              #{task.category}
+              {task.category}
             </span>
           )}
         </div>
 
         {/* Scheduled date */}
         {task.scheduledAt && (
-          <p style={{ margin: '6px 0 0', fontSize: 12, color: '#7c3aed', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span>📅</span>
-            <span>{formatDate(task.scheduledAt)}</span>
+          <p style={{ marginTop: 5, fontSize: 12, color: '#5856d6', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="11" height="12" viewBox="0 0 11 12" fill="none">
+              <rect x="0.5" y="1.5" width="10" height="10" rx="2.5" stroke="#5856d6"/>
+              <path d="M3 0.5V2.5M8 0.5V2.5" stroke="#5856d6" strokeLinecap="round"/>
+              <path d="M0.5 5H10.5" stroke="#5856d6"/>
+            </svg>
+            {formatScheduled(task.scheduledAt)}
           </p>
         )}
       </div>
 
-      {/* Right: created date + delete */}
+      {/* Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
         <button
           onClick={() => onDelete(task.id)}
-          title="Delete task"
+          title="Delete"
           style={{
             background: 'transparent',
             border: 'none',
             cursor: 'pointer',
-            color: '#94a3b8',
-            fontSize: 16,
-            padding: 2,
-            lineHeight: 1,
-            borderRadius: 4,
+            color: '#c7c7cc',
+            width: 22,
+            height: 22,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 6,
+            fontSize: 13,
+            transition: 'color 0.15s',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#94a3b8')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#ff3b30')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#c7c7cc')}
         >
           ✕
         </button>
-        <span style={{ fontSize: 11, color: '#94a3b8', whiteSpace: 'nowrap' }}>
-          {new Date(task.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-        </span>
+        <span style={{ fontSize: 11, color: '#aeaeb2' }}>{formatCreated(task.createdAt)}</span>
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL ?? ''
 
 type FilterStatus = TaskStatus | 'ALL'
 
-const FILTER_TABS: { label: string; value: FilterStatus }[] = [
+const FILTERS: { label: string; value: FilterStatus }[] = [
   { label: 'All', value: 'ALL' },
   { label: 'Pending', value: 'PENDING' },
   { label: 'In Progress', value: 'IN_PROGRESS' },
@@ -50,9 +50,7 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const updated: Task = await res.json()
       setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
-    } catch {
-      // silent — card will revert visually on next render
-    }
+    } catch { /* silent */ }
   }
 
   async function handleDelete(id: number) {
@@ -60,138 +58,134 @@ export default function App() {
       const res = await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setTasks((prev) => prev.filter((t) => t.id !== id))
-    } catch {
-      // silent
-    }
+    } catch { /* silent */ }
   }
 
   const filtered = filter === 'ALL' ? tasks : tasks.filter((t) => t.status === filter)
 
-  const stats = {
-    total: tasks.length,
-    inProgress: tasks.filter((t) => t.status === 'IN_PROGRESS').length,
-    urgent: tasks.filter((t) => t.priority === 'URGENT').length,
-    completed: tasks.filter((t) => t.status === 'COMPLETED').length,
-  }
+  const stats = [
+    { label: 'Total',       value: tasks.length },
+    { label: 'In Progress', value: tasks.filter((t) => t.status === 'IN_PROGRESS').length },
+    { label: 'Urgent',      value: tasks.filter((t) => t.priority === 'URGENT').length },
+    { label: 'Completed',   value: tasks.filter((t) => t.status === 'COMPLETED').length },
+  ]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f1f5f9', fontFamily: "'Inter', system-ui, sans-serif" }}>
-      {/* Header */}
+    <div style={{ minHeight: '100vh', background: '#f5f5f7' }}>
+      {/* Sticky frosted glass header */}
       <header
         style={{
-          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-          padding: '20px 24px',
-          boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          background: 'rgba(245,245,247,0.72)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: '0.5px solid rgba(0,0,0,0.1)',
+          padding: '14px 24px',
         }}
       >
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 24 }}>📋</span>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-                Task Manager
-              </h1>
-            </div>
-            <EnvBadge />
+        <div
+          style={{
+            maxWidth: 720,
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18, color: '#1d1d1f' }}>✦</span>
+            <span style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', letterSpacing: '-0.02em' }}>
+              Tasks
+            </span>
           </div>
-
-          {/* Stats */}
-          <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
-            {[
-              { label: 'Total', value: stats.total, color: 'rgba(255,255,255,0.2)' },
-              { label: 'In Progress', value: stats.inProgress, color: 'rgba(96,165,250,0.3)' },
-              { label: 'Urgent', value: stats.urgent, color: 'rgba(252,165,165,0.3)' },
-              { label: 'Completed', value: stats.completed, color: 'rgba(110,231,183,0.3)' },
-            ].map((s) => (
-              <div
-                key={s.label}
-                style={{
-                  background: s.color,
-                  borderRadius: 10,
-                  padding: '8px 16px',
-                  minWidth: 72,
-                  textAlign: 'center',
-                }}
-              >
-                <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{s.label}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <EnvBadge />
+            <button
+              onClick={() => setShowForm((v) => !v)}
+              style={{
+                background: '#0071e3',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 980,
+                padding: '6px 16px',
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: 'pointer',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {showForm ? 'Cancel' : '+ New'}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <main style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px' }}>
-        {/* Form toggle */}
-        {showForm ? (
-          <TaskForm onCreated={handleCreated} onClose={() => setShowForm(false)} />
-        ) : (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button
-              onClick={() => setShowForm(true)}
+      <main style={{ maxWidth: 720, margin: '0 auto', padding: '28px 16px 48px' }}>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 24 }}>
+          {stats.map((s) => (
+            <div
+              key={s.label}
               style={{
-                background: '#6366f1',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 10,
-                padding: '10px 20px',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                boxShadow: '0 2px 8px rgba(99,102,241,0.35)',
+                background: '#ffffff',
+                borderRadius: 14,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04), 0 0 0 0.5px rgba(0,0,0,0.06)',
+                padding: '14px 16px',
+                textAlign: 'center',
               }}
             >
-              <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> New Task
-            </button>
-          </div>
-        )}
+              <div style={{ fontSize: 26, fontWeight: 700, color: '#1d1d1f', letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 4 }}>
+                {s.value}
+              </div>
+              <div style={{ fontSize: 11, color: '#8e8e93' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
 
-        {/* Filter tabs */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 4,
-            overflowX: 'auto',
-            marginBottom: 16,
-            paddingBottom: 2,
-          }}
-        >
-          {FILTER_TABS.map((tab) => {
-            const count = tab.value === 'ALL' ? tasks.length : tasks.filter((t) => t.status === tab.value).length
-            const active = filter === tab.value
+        {/* Form */}
+        {showForm && <TaskForm onCreated={handleCreated} onClose={() => setShowForm(false)} />}
+
+        {/* Filter chips */}
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 2, scrollbarWidth: 'none' }}>
+          {FILTERS.map((f) => {
+            const count = f.value === 'ALL' ? tasks.length : tasks.filter((t) => t.status === f.value).length
+            const active = filter === f.value
             return (
               <button
-                key={tab.value}
-                onClick={() => setFilter(tab.value)}
+                key={f.value}
+                onClick={() => setFilter(f.value)}
                 style={{
-                  background: active ? '#6366f1' : '#fff',
-                  color: active ? '#fff' : '#64748b',
-                  border: `1px solid ${active ? '#6366f1' : '#e2e8f0'}`,
-                  borderRadius: 20,
-                  padding: '5px 12px',
+                  background: active ? '#1d1d1f' : '#ffffff',
+                  color: active ? '#ffffff' : '#48484a',
+                  border: active ? 'none' : '0.5px solid rgba(0,0,0,0.12)',
+                  borderRadius: 980,
+                  padding: '5px 13px',
                   fontSize: 12,
-                  fontWeight: 600,
+                  fontWeight: 500,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 4,
+                  gap: 5,
+                  boxShadow: active ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+                  transition: 'background 0.15s, color 0.15s',
+                  flexShrink: 0,
                 }}
               >
-                {tab.label}
+                {f.label}
                 {count > 0 && (
                   <span
                     style={{
-                      background: active ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                      color: active ? '#fff' : '#64748b',
-                      borderRadius: 10,
-                      padding: '0 6px',
+                      background: active ? 'rgba(255,255,255,0.2)' : '#f2f2f7',
+                      color: active ? '#fff' : '#8e8e93',
+                      borderRadius: 980,
+                      padding: '0 5px',
                       fontSize: 10,
-                      fontWeight: 700,
+                      fontWeight: 600,
+                      minWidth: 16,
+                      textAlign: 'center',
                     }}
                   >
                     {count}
@@ -202,7 +196,7 @@ export default function App() {
           })}
         </div>
 
-        {/* Task list */}
+        {/* List */}
         <TaskList
           tasks={filtered}
           loading={loading}
