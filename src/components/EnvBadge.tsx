@@ -1,23 +1,24 @@
 export default function EnvBadge() {
   const mode = import.meta.env.MODE
 
-  const colors: Record<string, string> = {
-    development: '#f59e0b',
-    production: '#10b981',
-    test: '#6366f1',
+  const colors: Record<string, { bg: string; text: string }> = {
+    development: { bg: 'rgba(255,159,10,0.14)', text: '#b25000' },
+    production:  { bg: 'rgba(52,199,89,0.14)',  text: '#1a7f37' },
+    test:        { bg: 'rgba(88,86,214,0.14)',   text: '#3634a3' },
   }
 
-  const bg = colors[mode] ?? '#6b7280'
+  const { bg, text } = colors[mode] ?? { bg: 'rgba(142,142,147,0.14)', text: '#48484a' }
 
   return (
     <span
       style={{
         background: bg,
-        color: '#fff',
-        padding: '2px 8px',
-        borderRadius: 4,
+        color: text,
+        padding: '3px 10px',
+        borderRadius: 980,
         fontSize: 12,
-        fontFamily: 'monospace',
+        fontWeight: 500,
+        letterSpacing: '0.01em',
       }}
     >
       {mode}
