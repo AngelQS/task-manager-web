@@ -8,26 +8,26 @@ interface Props {
 
 const API_URL = import.meta.env.VITE_API_URL ?? ''
 
-const inputStyle: React.CSSProperties = {
+const fieldStyle: React.CSSProperties = {
   width: '100%',
-  padding: '8px 12px',
-  borderRadius: 8,
-  border: '1px solid #e2e8f0',
-  fontSize: 14,
-  color: '#0f172a',
-  background: '#f8fafc',
-  boxSizing: 'border-box',
-  outline: 'none',
+  padding: '10px 12px',
+  borderRadius: 10,
+  border: 'none',
+  background: '#f2f2f7',
+  fontSize: 15,
+  color: '#1d1d1f',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  transition: 'background 0.15s, box-shadow 0.15s',
 }
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 12,
-  fontWeight: 600,
-  color: '#475569',
-  marginBottom: 4,
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
+  fontWeight: 500,
+  color: '#6e6e73',
+  marginBottom: 5,
+  letterSpacing: '0.01em',
 }
 
 export default function TaskForm({ onCreated, onClose }: Props) {
@@ -47,11 +47,7 @@ export default function TaskForm({ onCreated, onClose }: Props) {
     setError(null)
 
     try {
-      const body: Record<string, unknown> = {
-        title: title.trim(),
-        status,
-        priority,
-      }
+      const body: Record<string, unknown> = { title: title.trim(), status, priority }
       if (category.trim()) body.category = category.trim()
       if (scheduledAt) body.scheduledAt = new Date(scheduledAt).toISOString()
 
@@ -76,49 +72,70 @@ export default function TaskForm({ onCreated, onClose }: Props) {
   return (
     <div
       style={{
-        background: '#ffffff',
-        borderRadius: 16,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
-        padding: 24,
-        marginBottom: 24,
-        border: '1px solid #e2e8f0',
+        background: 'rgba(255,255,255,0.82)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderRadius: 18,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.07)',
+        padding: '22px 22px 20px',
+        marginBottom: 20,
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a' }}>New Task</h2>
+        <h2 style={{ fontSize: 17, fontWeight: 600, color: '#1d1d1f', letterSpacing: '-0.02em' }}>
+          New Task
+        </h2>
         <button
           onClick={onClose}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18 }}
+          style={{
+            background: '#f2f2f7',
+            border: 'none',
+            borderRadius: 980,
+            width: 26,
+            height: 26,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: '#48484a',
+            fontSize: 13,
+          }}
         >
           ✕
         </button>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gap: 16 }}>
-          {/* Title */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
-            <label style={labelStyle}>Title *</label>
+            <label style={labelStyle}>Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What needs to be done?"
               disabled={submitting}
-              style={inputStyle}
+              style={fieldStyle}
               autoFocus
+              onFocus={(e) => {
+                e.currentTarget.style.background = '#fff'
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,113,227,0.3)'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.background = '#f2f2f7'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
             />
           </div>
 
-          {/* Status + Priority */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label style={labelStyle}>Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
                 disabled={submitting}
-                style={inputStyle}
+                style={fieldStyle}
               >
                 <option value="PENDING">Pending</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -128,14 +145,13 @@ export default function TaskForm({ onCreated, onClose }: Props) {
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
-
             <div>
               <label style={labelStyle}>Priority</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
                 disabled={submitting}
-                style={inputStyle}
+                style={fieldStyle}
               >
                 <option value="LOW">Low</option>
                 <option value="MEDIUM">Medium</option>
@@ -145,52 +161,69 @@ export default function TaskForm({ onCreated, onClose }: Props) {
             </div>
           </div>
 
-          {/* Category + Scheduled date */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={labelStyle}>Category <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span></label>
+              <label style={labelStyle}>
+                Category <span style={{ color: '#aeaeb2', fontWeight: 400 }}>(optional)</span>
+              </label>
               <input
                 type="text"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                placeholder="e.g. work, personal"
+                placeholder="work, personal…"
                 disabled={submitting}
-                style={inputStyle}
+                style={fieldStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.background = '#fff'
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,113,227,0.3)'
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.background = '#f2f2f7'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
               />
             </div>
-
             <div>
-              <label style={labelStyle}>Scheduled date <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional)</span></label>
+              <label style={labelStyle}>
+                Scheduled <span style={{ color: '#aeaeb2', fontWeight: 400 }}>(optional)</span>
+              </label>
               <input
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
                 disabled={submitting}
-                style={inputStyle}
+                style={fieldStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.background = '#fff'
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,113,227,0.3)'
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.background = '#f2f2f7'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
               />
             </div>
           </div>
 
           {error && (
-            <p style={{ margin: 0, color: '#dc2626', fontSize: 13, background: '#fef2f2', padding: '8px 12px', borderRadius: 8 }}>
+            <p style={{ fontSize: 13, color: '#ff3b30', background: 'rgba(255,59,48,0.07)', borderRadius: 8, padding: '8px 12px' }}>
               {error}
             </p>
           )}
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 2 }}>
             <button
               type="button"
               onClick={onClose}
               style={{
-                padding: '8px 20px',
-                borderRadius: 8,
-                border: '1px solid #e2e8f0',
-                background: '#fff',
-                color: '#64748b',
+                padding: '8px 18px',
+                borderRadius: 980,
+                border: 'none',
+                background: '#f2f2f7',
+                color: '#1d1d1f',
                 fontSize: 14,
-                cursor: 'pointer',
                 fontWeight: 500,
+                cursor: 'pointer',
               }}
             >
               Cancel
@@ -199,17 +232,18 @@ export default function TaskForm({ onCreated, onClose }: Props) {
               type="submit"
               disabled={submitting || !title.trim()}
               style={{
-                padding: '8px 20px',
-                borderRadius: 8,
+                padding: '8px 18px',
+                borderRadius: 980,
                 border: 'none',
-                background: submitting || !title.trim() ? '#c7d2fe' : '#6366f1',
+                background: submitting || !title.trim() ? '#a0c4f1' : '#0071e3',
                 color: '#fff',
                 fontSize: 14,
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: submitting || !title.trim() ? 'not-allowed' : 'pointer',
+                transition: 'background 0.15s',
               }}
             >
-              {submitting ? 'Creating…' : 'Create Task'}
+              {submitting ? 'Adding…' : 'Add Task'}
             </button>
           </div>
         </div>
