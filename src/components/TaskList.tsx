@@ -7,9 +7,10 @@ interface Props {
   error: string | null
   onStatusChange: (id: number, status: TaskStatus) => void
   onDelete: (id: number) => void
+  onToggleChecklistItem: (taskId: number, itemId: number) => void
 }
 
-export default function TaskList({ tasks, loading, error, onStatusChange, onDelete }: Props) {
+export default function TaskList({ tasks, loading, error, onStatusChange, onDelete, onToggleChecklistItem }: Props) {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
@@ -46,6 +47,7 @@ export default function TaskList({ tasks, loading, error, onStatusChange, onDele
           task={task}
           onStatusChange={onStatusChange}
           onDelete={onDelete}
+          onToggleChecklistItem={onToggleChecklistItem}
         />
       ))}
     </div>

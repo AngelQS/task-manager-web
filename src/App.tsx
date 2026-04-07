@@ -61,6 +61,15 @@ export default function App() {
     } catch { /* silent */ }
   }
 
+  async function handleToggleChecklistItem(taskId: number, itemId: number) {
+    try {
+      const res = await fetch(`${API_URL}/tasks/${taskId}/checklist/${itemId}`, { method: 'PATCH' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const updated: Task = await res.json()
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+    } catch { /* silent */ }
+  }
+
   const filtered = filter === 'ALL' ? tasks : tasks.filter((t) => t.status === filter)
 
   const stats = [
@@ -203,6 +212,7 @@ export default function App() {
           error={error}
           onStatusChange={handleStatusChange}
           onDelete={handleDelete}
+          onToggleChecklistItem={handleToggleChecklistItem}
         />
       </main>
     </div>
