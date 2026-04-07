@@ -10,6 +10,7 @@ const tasks: Task[] = [
     status: 'PENDING',
     priority: 'MEDIUM',
     createdAt: new Date().toISOString(),
+    checklist: [],
   },
   {
     id: 2,
@@ -17,6 +18,7 @@ const tasks: Task[] = [
     status: 'COMPLETED',
     priority: 'HIGH',
     createdAt: new Date().toISOString(),
+    checklist: [{ id: 1, text: 'Step one', completed: true, position: 0 }],
   },
 ]
 
@@ -24,26 +26,26 @@ const noop = vi.fn()
 
 describe('TaskList', () => {
   it('renders a list of tasks', () => {
-    render(<TaskList tasks={tasks} loading={false} error={null} onStatusChange={noop} onDelete={noop} />)
+    render(<TaskList tasks={tasks} loading={false} error={null} onStatusChange={noop} onDelete={noop} onToggleChecklistItem={noop} />)
 
     expect(screen.getByText('Buy groceries')).toBeInTheDocument()
     expect(screen.getByText('Write tests')).toBeInTheDocument()
   })
 
   it('shows loading state', () => {
-    render(<TaskList tasks={[]} loading={true} error={null} onStatusChange={noop} onDelete={noop} />)
+    render(<TaskList tasks={[]} loading={true} error={null} onStatusChange={noop} onDelete={noop} onToggleChecklistItem={noop} />)
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
   })
 
   it('shows error message', () => {
-    render(<TaskList tasks={[]} loading={false} error="Network error" onStatusChange={noop} onDelete={noop} />)
+    render(<TaskList tasks={[]} loading={false} error="Network error" onStatusChange={noop} onDelete={noop} onToggleChecklistItem={noop} />)
 
     expect(screen.getByText(/network error/i)).toBeInTheDocument()
   })
 
   it('shows empty state when no tasks', () => {
-    render(<TaskList tasks={[]} loading={false} error={null} onStatusChange={noop} onDelete={noop} />)
+    render(<TaskList tasks={[]} loading={false} error={null} onStatusChange={noop} onDelete={noop} onToggleChecklistItem={noop} />)
 
     expect(screen.getByText(/no tasks/i)).toBeInTheDocument()
   })

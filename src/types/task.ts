@@ -1,6 +1,13 @@
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'SCHEDULED' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED'
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
 
+export interface ChecklistItem {
+  id: number
+  text: string
+  completed: boolean
+  position: number
+}
+
 export interface Task {
   id: number
   title: string
@@ -9,4 +16,5 @@ export interface Task {
   category?: string
   scheduledAt?: string
   createdAt: string
+  checklist: ChecklistItem[]
 }
